@@ -100,6 +100,7 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
     private let rankLabel = ArcadeLabel(size: 14, weight: .heavy)
     private let finalScoreLabel = ArcadeLabel(size: 60, monospacedDigits: true)
     private let bestLabel = ArcadeLabel(size: 20, monospacedDigits: true)
+    private let hopsLabel = ArcadeLabel(size: 16, weight: .heavy, monospacedDigits: true)
     private let placementLabel = ArcadeLabel(size: 16, weight: .heavy)
     private let retryLabel = ArcadeLabel(size: 22)
     private var canRetry = false
@@ -582,6 +583,11 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
         bestLabel.kern = 2
         bestLabel.outlineWidth = 4
 
+        hopsLabel.fill = Palette.hudSilver
+        hopsLabel.kern = 2
+        hopsLabel.outlineWidth = 3
+        hopsLabel.accessibilityIdentifier = "hops"
+
         let divider = UIView()
         divider.backgroundColor = Palette.accentGold.withAlphaComponent(0.5)
         divider.translatesAutoresizingMaskIntoConstraints = false
@@ -596,13 +602,14 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
         placementLabel.outlineWidth = 3
         placementLabel.accessibilityIdentifier = "placement"
 
-        let stack = UIStackView(arrangedSubviews: [gameOverTitle, rankPill, scoreCaption, finalScoreLabel, bestLabel, placementLabel, divider, retryLabel])
+        let stack = UIStackView(arrangedSubviews: [gameOverTitle, rankPill, scoreCaption, finalScoreLabel, bestLabel, hopsLabel, placementLabel, divider, retryLabel])
         stack.axis = .vertical
         stack.spacing = 10
         stack.alignment = .center
         stack.setCustomSpacing(16, after: rankPill)
         stack.setCustomSpacing(-4, after: scoreCaption)
-        stack.setCustomSpacing(6, after: bestLabel)
+        stack.setCustomSpacing(4, after: bestLabel)
+        stack.setCustomSpacing(6, after: hopsLabel)
         stack.setCustomSpacing(16, after: placementLabel)
         stack.setCustomSpacing(16, after: divider)
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -817,7 +824,7 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
         }
     }
 
-    func hudGameOver(score: Int, best: Int, creatine: Int, newBest: Bool, placement: Int?) {
+    func hudGameOver(score: Int, best: Int, creatine: Int, hops: Int, newBest: Bool, placement: Int?) {
         DispatchQueue.main.async {
             self.hidePauseChrome()
             if let placement {
@@ -832,6 +839,7 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
             self.bestLabel.layer.removeAllAnimations()
             self.bestLabel.alpha = 1
             if newBest && score > 0 { self.pulse(self.bestLabel) }
+            self.hopsLabel.display = "HOPS  \(hops)"
             self.gameOverPanel.isHidden = false
             self.canRetry = false
             self.slamIn(self.gameOverPanel)

@@ -5,7 +5,7 @@ protocol GameHUD: AnyObject {
     func hudSetScore(_ score: Int)
     func hudSetCreatine(_ creatine: Int)
     /// `placement` is the 1-based leaderboard slot this run earned, if any.
-    func hudGameOver(score: Int, best: Int, creatine: Int, newBest: Bool, placement: Int?)
+    func hudGameOver(score: Int, best: Int, creatine: Int, hops: Int, newBest: Bool, placement: Int?)
     func hudStarted()
     func hudShowTitle(best: Int, board: [Int])
     /// Selected skin plus the next locked one (nil once everything is unlocked).
@@ -72,6 +72,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
 
     // scoring
     private var score = 0
+    private var hops = 0
     private var creatineCollected = 0
     private var totalCreatine: Int = {
         let defaults = UserDefaults.standard
@@ -201,6 +202,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         ridingRow = nil
         facing = .forward
         score = 0
+        hops = 0
         creatineCollected = 0
         idleTime = 0
         eagleTriggered = false
@@ -501,6 +503,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         }
 
         isHopping = true
+        hops += 1
         ridingLog = nil
         ridingRow = nil
         SoundManager.shared.play("hop", volume: 0.9)
@@ -771,7 +774,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         }
         combo = 0
         hud?.hudCombo(0)
-        hud?.hudGameOver(score: score, best: best, creatine: totalCreatine, newBest: newBest, placement: placement)
+        hud?.hudGameOver(score: score, best: best, creatine: totalCreatine, hops: hops, newBest: newBest, placement: placement)
         mp.sendGameOver(score: score)
         mp.sendState(row: playerRow, x: playerX, score: score, alive: false)
     }
