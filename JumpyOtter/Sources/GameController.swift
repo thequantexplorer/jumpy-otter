@@ -5,7 +5,8 @@ protocol GameHUD: AnyObject {
     func hudSetScore(_ score: Int)
     func hudSetCreatine(_ creatine: Int)
     /// `placement` is the 1-based leaderboard slot this run earned, if any.
-    func hudGameOver(score: Int, best: Int, creatine: Int, newBest: Bool, placement: Int?)
+    /// `duration` is unpaused play time from the first hop to death.
+    func hudGameOver(score: Int, best: Int, creatine: Int, newBest: Bool, placement: Int?, duration: TimeInterval)
     func hudStarted()
     func hudShowTitle(best: Int, board: [Int])
     /// Selected skin plus the next locked one (nil once everything is unlocked).
@@ -41,7 +42,12 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         }
     }
 
-    private(set) var state: State = .title
+    private(set) var state: State = .title {
+        didSet {
+            if state == .playing, oldValue == .title { runStartClock = clock }
+            if state == .dying { runDuration = TimeInterval(clock - runStartClock) }
+        }
+    }
     private(set) var isPaused = false
 
     // world
@@ -97,6 +103,8 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
 
     // timing
     private var lastTime: TimeInterval = -1
+    private var runStartClock: Float = 0
+    private var runDuration: TimeInterval = 0
     private var idleTime: Float = 0
     private var eagleTriggered = false
 
@@ -771,7 +779,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         }
         combo = 0
         hud?.hudCombo(0)
-        hud?.hudGameOver(score: score, best: best, creatine: totalCreatine, newBest: newBest, placement: placement)
+        hud?.hudGameOver(score: score, best: best, creatine: totalCreatine, newBest: newBest, placement: placement, duration: runDuration)
         mp.sendGameOver(score: score)
         mp.sendState(row: playerRow, x: playerX, score: score, alive: false)
     }
