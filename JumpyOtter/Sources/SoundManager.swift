@@ -10,7 +10,7 @@ final class SoundManager {
     private let queue = DispatchQueue(label: "sound")
 
     var enabled: Bool = UserDefaults.standard.object(forKey: "soundOn") as? Bool ?? true {
-        didSet { UserDefaults.standard.set(enabled, forKey: "soundEnabled") }
+        didSet { UserDefaults.standard.set(enabled, forKey: "soundOn") }
     }
 
     private init() {

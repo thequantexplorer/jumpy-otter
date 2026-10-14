@@ -753,7 +753,7 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
 
     @objc private func onTap() {
         if game.isPaused {
-            game.setPaused(true)
+            game.setPaused(false)
         } else if game.state == .gameOver {
             guard canRetry else { return }
             hideGameOver()
