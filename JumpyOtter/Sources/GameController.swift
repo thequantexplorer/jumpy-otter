@@ -8,7 +8,7 @@ protocol GameHUD: AnyObject {
     /// `duration` is unpaused play time from the first hop to death.
     func hudGameOver(score: Int, best: Int, creatine: Int, newBest: Bool, placement: Int?, duration: TimeInterval)
     func hudStarted()
-    func hudShowTitle(best: Int, board: [Int])
+    func hudShowTitle(best: Int, board: [Int], gamesPlayed: Int, totalHops: Int)
     /// Selected skin plus the next locked one (nil once everything is unlocked).
     func hudSkin(_ skin: Skin, next: Skin?, total: Int)
     func hudCombo(_ combo: Int)
@@ -87,6 +87,8 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         return defaults.integer(forKey: "totalCoins")
     }()
     private var best = UserDefaults.standard.integer(forKey: "best")
+    private var gamesPlayed = UserDefaults.standard.integer(forKey: "gamesPlayed")
+    private var totalHops = UserDefaults.standard.integer(forKey: "totalHops")
     private lazy var board: [Int] = {
         if let saved = UserDefaults.standard.array(forKey: "top5") as? [Int] { return saved }
         return best > 0 ? [best] : []
@@ -266,7 +268,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
     }
 
     func presentTitle() {
-        hud?.hudShowTitle(best: best, board: board)
+        hud?.hudShowTitle(best: best, board: board, gamesPlayed: gamesPlayed, totalHops: totalHops)
     }
 
     func restart() {
@@ -284,7 +286,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         guard shouldRestart else { return }
         state = .title
         startFresh()
-        hud?.hudShowTitle(best: best, board: board)
+        hud?.hudShowTitle(best: best, board: board, gamesPlayed: gamesPlayed, totalHops: totalHops)
     }
 
     private func applyPendingPause() {
@@ -509,6 +511,7 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
         }
 
         isHopping = true
+        totalHops += 1
         ridingLog = nil
         ridingRow = nil
         SoundManager.shared.play("hop", volume: 0.9)
@@ -763,6 +766,9 @@ final class GameController: NSObject, SCNSceneRendererDelegate {
     private func finishGameOver() {
         guard state == .dying else { return }
         state = .gameOver
+        gamesPlayed += 1
+        UserDefaults.standard.set(gamesPlayed, forKey: "gamesPlayed")
+        UserDefaults.standard.set(totalHops, forKey: "totalHops")
         let newBest = score > best
         if newBest {
             best = score

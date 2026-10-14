@@ -94,6 +94,7 @@ class MainActivity : Activity(), GameHUD {
     // overlays
     private lateinit var titleOverlay: LinearLayout
     private lateinit var hiScoreLabel: ArcadeTextView
+    private lateinit var lifetimeLabel: ArcadeTextView
     private lateinit var logoColumn: LinearLayout
     private lateinit var boardCard: LinearLayout
     private val boardRows = ArrayList<ArcadeTextView>()
@@ -395,6 +396,7 @@ class MainActivity : Activity(), GameHUD {
             setShadowLayer(3f, 0f, 6f, Color.argb(170, 0, 0, 0))
         }
         hiScoreLabel = arcade(20f, Palette.accentGold, "HI-SCORE  0", outlineDp = 3f, letterSpacing = 0.1f)
+        lifetimeLabel = arcade(14f, Palette.hudSilver, "GAMES 0  ·  HOPS 0", outlineDp = 2.5f, letterSpacing = 0.08f)
         val tap = arcade(24f, Palette.hudCream, "TAP TO HOP", outlineDp = 3f, letterSpacing = 0.12f)
         val steer = arcade(14f, Palette.hudCream, "SWIPE TO STEER", outlineDp = 2.5f, letterSpacing = 0.2f)
         val credits = arcade(12f, Palette.hudCream, "1UP  ·  CREDITS 99  ·  PRESS TO START", outlineDp = 2.5f, letterSpacing = 0.18f)
@@ -406,6 +408,7 @@ class MainActivity : Activity(), GameHUD {
         logoColumn.addView(logoTop, LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = dp(6f) })
         logoColumn.addView(logoBottom, LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = -dp(14f) })
         logoColumn.addView(hiScoreLabel, LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = dp(14f) })
+        logoColumn.addView(lifetimeLabel, LinearLayout.LayoutParams(WRAP, WRAP).apply { topMargin = dp(4f) })
 
         // attract swap: logo <-> high-score table
         boardCard = LinearLayout(this).apply {
@@ -542,8 +545,9 @@ class MainActivity : Activity(), GameHUD {
         pauseOverlay.visibility = View.GONE
     }
 
-    private fun showTitle(best: Int, board: List<Int>) {
+    private fun showTitle(best: Int, board: List<Int>, gamesPlayed: Int, totalHops: Int) {
         hiScoreLabel.text = "HI-SCORE  $best"
+        lifetimeLabel.text = "GAMES $gamesPlayed  ·  HOPS $totalHops"
         fillBoard(board)
         resetAttract()
         hidePauseChrome()
@@ -631,10 +635,10 @@ class MainActivity : Activity(), GameHUD {
         }
     }
 
-    override fun hudShowTitle(best: Int, board: List<Int>) {
+    override fun hudShowTitle(best: Int, board: List<Int>, gamesPlayed: Int, totalHops: Int) {
         runOnUiThread {
             if (game.state != GameController.State.TITLE) return@runOnUiThread
-            showTitle(best, board)
+            showTitle(best, board, gamesPlayed, totalHops)
         }
     }
 

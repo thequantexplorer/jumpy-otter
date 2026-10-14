@@ -25,7 +25,7 @@ interface GameHUD {
     /** [placement] is the 1-based leaderboard slot this run earned, if any. */
     fun hudGameOver(score: Int, best: Int, creatine: Int, newBest: Boolean, placement: Int?)
     fun hudStarted()
-    fun hudShowTitle(best: Int, board: List<Int>)
+    fun hudShowTitle(best: Int, board: List<Int>, gamesPlayed: Int, totalHops: Int)
     /** Selected skin plus the next locked one (null once everything is unlocked). */
     fun hudSkin(skin: Skin, next: Skin?, total: Int)
     fun hudCombo(combo: Int)
@@ -96,6 +96,8 @@ class GameController(
     private var creatineCollected = 0
     private var totalCreatine = prefs.getInt("totalCreatine", 0)
     private var best = prefs.getInt("best", 0)
+    private var gamesPlayed = prefs.getInt("gamesPlayed", 0)
+    private var totalHops = prefs.getInt("totalHops", 0)
     private var board: List<Int> = prefs.getString("top5", null)
         ?.split(',')?.mapNotNull { it.toIntOrNull() }
         ?: if (best > 0) listOf(best) else emptyList()
@@ -228,7 +230,7 @@ class GameController(
     }
 
     fun presentTitle() {
-        hud?.hudShowTitle(best, board)
+        hud?.hudShowTitle(best, board, gamesPlayed, totalHops)
     }
 
     fun restart() {
@@ -247,7 +249,7 @@ class GameController(
         if (!shouldRestart) return
         state = State.TITLE
         startFresh()
-        hud?.hudShowTitle(best, board)
+        hud?.hudShowTitle(best, board, gamesPlayed, totalHops)
     }
 
     private fun applyPendingPause() {
@@ -503,6 +505,7 @@ class GameController(
         }
 
         isHopping = true
+        totalHops += 1
         ridingLog = null
         ridingRow = null
         sound.play(Sfx.HOP, 0.9f)
@@ -740,6 +743,8 @@ class GameController(
     private fun finishGameOver() {
         if (state != State.DYING) return
         state = State.GAME_OVER
+        gamesPlayed += 1
+        prefs.edit().putInt("gamesPlayed", gamesPlayed).putInt("totalHops", totalHops).apply()
         val newBest = score > best
         if (newBest) {
             best = score

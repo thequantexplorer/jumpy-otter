@@ -82,6 +82,7 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
     private let logoTop = ArcadeLabel(size: 76)
     private let logoBottom = ArcadeLabel(size: 76)
     private let hiScoreLabel = ArcadeLabel(size: 18, monospacedDigits: true)
+    private let lifetimeLabel = ArcadeLabel(size: 13, weight: .heavy, monospacedDigits: true)
     private let tapLabel = ArcadeLabel(size: 26)
     private let creditsLabel = ArcadeLabel(size: 14, weight: .heavy)
     private let logoStack = UIStackView()
@@ -468,9 +469,14 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
         hiScoreLabel.fill = Palette.accentGold
         hiScoreLabel.kern = 2
         hiScoreLabel.outlineWidth = 4
+        lifetimeLabel.fill = Palette.hudSilver
+        lifetimeLabel.kern = 1.5
+        lifetimeLabel.outlineWidth = 4
 
         logoStack.addArrangedSubview(logo)
         logoStack.addArrangedSubview(hiScoreLabel)
+        logoStack.addArrangedSubview(lifetimeLabel)
+        logoStack.setCustomSpacing(6, after: hiScoreLabel)
         logoStack.axis = .vertical
         logoStack.alignment = .center
         logoStack.spacing = 26
@@ -808,11 +814,12 @@ final class GameViewController: UIViewController, GameHUD, UIGestureRecognizerDe
         }
     }
 
-    func hudShowTitle(best: Int, board: [Int]) {
+    func hudShowTitle(best: Int, board: [Int], gamesPlayed: Int, totalHops: Int) {
         DispatchQueue.main.async {
             self.gameOverPanel.isHidden = true
             self.scoreLabel.display = "0"
             self.hiScoreLabel.display = "HI-SCORE  \(best)"
+            self.lifetimeLabel.display = "GAMES \(gamesPlayed)  ·  HOPS \(totalHops)"
             self.fillBoard(board)
             self.resetAttract()
             self.hidePauseChrome()
